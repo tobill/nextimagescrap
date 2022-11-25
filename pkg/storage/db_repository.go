@@ -121,7 +121,10 @@ func (s *DbSourceStorage) GetFilesByMimetypeFilter(filter []string) ([]*imports.
 
 		for k, v := c.First(); k != nil; k, v = c.Next() { //sm := imports.SourceMedia{}
 			dbsm := DbSourceMedia{}
-			dbsm.unmarshalMedia(v)
+			errint := dbsm.unmarshalMedia(v)
+			if errint != nil {
+				return errint
+			}
 			for i := range filter {
 				if filter[i] == dbsm.Mimetype {
 					sm := &imports.SourceMedia{
@@ -152,12 +155,16 @@ func (s *DbSourceStorage) GetAllFiles() ([]*imports.SourceMedia, error) {
 
 		for k, v := c.First(); k != nil; k, v = c.Next() { //sm := imports.SourceMedia{}
 			dbsm := DbSourceMedia{}
-			dbsm.unmarshalMedia(v)
+			errint := dbsm.unmarshalMedia(v)
+			if errint != nil {
+				return errint
+			}
 			sm := &imports.SourceMedia{
-				Key:      dbsm.Key,
-				Path:     dbsm.Path,
-				Mimetype: dbsm.Mimetype,
-				Checksum: dbsm.Checksum,
+				Key:          dbsm.Key,
+				Path:         dbsm.Path,
+				Mimetype:     dbsm.Mimetype,
+				Checksum:     dbsm.Checksum,
+				CreationDate: dbsm.CreationDate,
 			}
 
 			me = append(me, sm)
@@ -216,10 +223,11 @@ func (s *DbSourceStorage) SaveMedia(media *imports.SourceMedia) (string, error) 
 
 		// convert to storage model
 		sMedia := &DbSourceMedia{
-			Key:      key,
-			Path:     media.Path,
-			Mimetype: media.Mimetype,
-			Checksum: media.Checksum,
+			Key:          key,
+			Path:         media.Path,
+			Mimetype:     media.Mimetype,
+			Checksum:     media.Checksum,
+			CreationDate: media.CreationDate,
 		}
 
 		d, errint := sMedia.marshalMedia()
@@ -235,6 +243,62 @@ func (s *DbSourceStorage) SaveMedia(media *imports.SourceMedia) (string, error) 
 		return "", err
 	}
 	return key, nil
+}
+
+func (s *DbSourceStorage) GetFileByKey(path string) (*imports.SourceMedia, error) {
+	var media *imports.SourceMedia
+	err := s.dbClient.View(func(txn *bolt.Tx) error {
+		bucket, err := getBucket(mediaSourceBucket, txn)
+		if err != nil {
+			return err
+		}
+		key := mediaSourceKeyPrefix + path
+		item := bucket.Get([]byte(key))
+		if item != nil {
+			dbsm := DbSourceMedia{}
+			errint := dbsm.unmarshalMedia(item)
+			if errint != nil {
+				return errint
+			}
+			media = &imports.SourceMedia{
+				Key:          dbsm.Key,
+				Path:         dbsm.Path,
+				Mimetype:     dbsm.Mimetype,
+				Checksum:     dbsm.Checksum,
+				CreationDate: dbsm.CreationDate,
+			}
+
+		}
+		return err
+	})
+	return media, err
+}
+
+func (s *DbSourceStorage) GetAllCheckSum() (error, []*imports.SourceChecksum) {
+	var cs []*imports.SourceChecksum
+	err := s.dbClient.View(func(txn *bolt.Tx) error {
+		bucket, err := getBucket(mediaCheckSumBucket, txn)
+		if err != nil {
+			return err
+		}
+
+		c := bucket.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() { //sm := imports.SourceMedia{}
+			dbsm := DbSourceChecksum{}
+			errint := dbsm.unmarshalChecksum(v)
+			if errint != nil {
+				return errint
+			}
+			s := &imports.SourceChecksum{
+				Key:     dbsm.Key,
+				Sources: dbsm.Sources,
+			}
+			cs = append(cs, s)
+		}
+		return nil
+	})
+	return err, cs
 }
 
 func (m *DbSourceMedia) marshalMedia() ([]byte, error) {

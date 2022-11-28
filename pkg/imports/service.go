@@ -137,9 +137,6 @@ func (s service) DetectMimetype(force bool) error {
 			continue
 		}
 		fob, err := os.Open(entry.Path)
-		defer func(fob *os.File) {
-			err = fob.Close()
-		}(fob)
 		if err != nil {
 			return err
 		}
@@ -155,7 +152,7 @@ func (s service) DetectMimetype(force bool) error {
 		if err != nil {
 			return err
 		}
-
+		fob.Close()
 	}
 	return err
 }

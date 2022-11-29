@@ -72,8 +72,10 @@ func (s *DbSourceStorage) AddFile(filePath string) (string, error) {
 			return err
 		}
 
+		id, _ := bucket.NextSequence()
 		// convert to storage model
 		sMedia := &DbSourceMedia{
+			Id:   int(id),
 			Key:  key,
 			Path: filePath,
 		}
@@ -128,6 +130,7 @@ func (s *DbSourceStorage) GetFilesByMimetypeFilter(filter []string) ([]*imports.
 			for i := range filter {
 				if filter[i] == dbsm.Mimetype {
 					sm := &imports.SourceMedia{
+						Id:       dbsm.Id,
 						Key:      dbsm.Key,
 						Path:     dbsm.Path,
 						Mimetype: dbsm.Mimetype,
@@ -160,6 +163,7 @@ func (s *DbSourceStorage) GetAllFiles() ([]*imports.SourceMedia, error) {
 				return errint
 			}
 			sm := &imports.SourceMedia{
+				Id:           dbsm.Id,
 				Key:          dbsm.Key,
 				Path:         dbsm.Path,
 				Mimetype:     dbsm.Mimetype,
@@ -223,6 +227,7 @@ func (s *DbSourceStorage) SaveMedia(media *imports.SourceMedia) (string, error) 
 
 		// convert to storage model
 		sMedia := &DbSourceMedia{
+			Id:           media.Id,
 			Key:          key,
 			Path:         media.Path,
 			Mimetype:     media.Mimetype,
@@ -261,6 +266,7 @@ func (s *DbSourceStorage) GetFileByKey(path string) (*imports.SourceMedia, error
 				return errint
 			}
 			media = &imports.SourceMedia{
+				Id:           dbsm.Id,
 				Key:          dbsm.Key,
 				Path:         dbsm.Path,
 				Mimetype:     dbsm.Mimetype,

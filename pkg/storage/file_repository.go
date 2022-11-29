@@ -47,13 +47,13 @@ func (d *DestinationFileStorage) getTargetPath(media *imports.SourceMedia) (stri
 	return datepath, nil
 }
 
-func (d *DestinationFileStorage) ExportToDirectory(media *imports.SourceMedia, i int, ext string) error {
+func (d *DestinationFileStorage) ExportToDirectory(media *imports.SourceMedia, ext string) error {
 	log.Printf("exporting %v", media)
 	targetPath, err := d.getTargetPath(media)
 	if err != nil {
 		return err
 	}
-	basefilename := fmt.Sprintf("image_%s_%d.%s", media.CreationDate.Format("20060102"), i, ext)
+	basefilename := fmt.Sprintf("image_%s_%d.%s", media.CreationDate.Format("20060102"), media.Id, ext)
 	destFilename := filepath.Join(targetPath, basefilename)
 	_, err = copyFile(media.Path, destFilename)
 	return err

@@ -9,6 +9,7 @@ type SourceMedia struct {
 	Mimetype     string
 	Checksum     string
 	CreationDate time.Time
+	Id           int
 }
 
 type SourceChecksum struct {

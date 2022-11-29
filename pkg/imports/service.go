@@ -21,7 +21,7 @@ type SourceFileRepository interface {
 }
 
 type DestinationFileRepository interface {
-	ExportToDirectory(media *SourceMedia, i int, ext string) error
+	ExportToDirectory(media *SourceMedia, ext string) error
 }
 
 type Service interface {
@@ -252,7 +252,7 @@ func (s service) OrganizeToFolder(force bool) error {
 		}
 		for i := range mtFilter {
 			if mtFilter[i] == media.Mimetype {
-				err = s.drf.ExportToDirectory(media, j, mtExt[i])
+				err = s.drf.ExportToDirectory(media, mtExt[i])
 				if err != nil {
 					return err
 				}

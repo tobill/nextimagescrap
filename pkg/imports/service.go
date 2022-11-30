@@ -114,7 +114,7 @@ func (s service) ComputeChecksums(force bool) error {
 			return err
 		}
 		entry.Checksum = hex.EncodeToString(h.Sum(nil))
-		//log.Printf("%s %s", entry.Path, entry.Checksum)
+		log.Printf("%s %s", entry.Path, entry.Checksum)
 		_, err = s.sdr.SaveMedia(entry)
 		err = s.sdr.AddChecksum(entry)
 		if err != nil {

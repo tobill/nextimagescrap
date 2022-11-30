@@ -171,7 +171,7 @@ func (s service) ExtractCreationDate(force bool) error {
 		return err
 	}
 	for i := range medialist {
-		if medialist[i].CreationDate.Year() > 2000 || !force {
+		if medialist[i].CreationDate.Year() > 2000 && !force {
 			log.Printf("CreationDate alr3eday present %v %v", medialist[i].Path, medialist[i].CreationDate)
 			continue
 		}

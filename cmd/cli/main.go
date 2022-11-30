@@ -64,7 +64,7 @@ func actionComputeChecksum(sourcePath *string) {
 		os.Exit(0)
 	}
 	importService := imports.NewService(fs, s)
-	err = importService.ComputeChecksums(true)
+	err = importService.ComputeChecksums(false)
 	log.Printf("error #{err}")
 }
 

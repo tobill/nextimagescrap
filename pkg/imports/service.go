@@ -171,12 +171,16 @@ func (s service) ExtractCreationDate(force bool) error {
 		return err
 	}
 	for i := range medialist {
+		if medialist[i].CreationDate.Year() < 2000 || !force {
+			continue
+		}
 		dt, err := s.ExtractExifDataFromFile(medialist[i])
 		if err != nil {
 			dt, err = s.ExtractDateByFilename(medialist[i])
 		}
 		if err == nil {
 			medialist[i].CreationDate = dt
+			log.Printf("found CreationDate for %v %v", medialist[i].Path, medialist[i].CreationDate)
 			_, err = s.sdr.SaveMedia(medialist[i])
 			if err != nil {
 				return err

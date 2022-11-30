@@ -65,7 +65,7 @@ func actionComputeChecksum(sourcePath *string) {
 	}
 	importService := imports.NewService(fs, s)
 	err = importService.ComputeChecksums(false)
-	log.Printf("error #{err}")
+	log.Printf("error %v", err)
 }
 
 func listAll(sourcePath *string) {

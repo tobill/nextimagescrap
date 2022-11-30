@@ -142,12 +142,17 @@ func (s service) DetectMimetype(force bool) error {
 		}
 		b := make([]byte, 512)
 		_, err = fob.Read(b)
-		if err != nil {
-			return err
+		var mtype *mimetype.MIME
+		if err == nil {
+			mtype, err = mimetype.DetectReader(bytes.NewReader(b))
+			log.Printf("%s %s", entry.Path, mtype.String())
 		}
-		mtype, err := mimetype.DetectReader(bytes.NewReader(b))
-		log.Printf("%s %s", entry.Path, mtype.String())
-		entry.Mimetype = mtype.String()
+		if err != nil {
+			log.Printf("could not detect mimetype for %v", entry.Path)
+			entry.Mimetype = "unknown/error"
+		} else {
+			entry.Mimetype = mtype.String()
+		}
 		_, err = s.sdr.SaveMedia(entry)
 		if err != nil {
 			return err

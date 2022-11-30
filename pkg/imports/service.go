@@ -102,9 +102,6 @@ func (s service) ComputeChecksums(force bool) error {
 			continue
 		}
 		fob, err := s.sfr.GetSourceFile(entry.Path)
-		defer func(fob *os.File) {
-			err = fob.Close()
-		}(fob)
 		if err != nil {
 			return err
 		}
@@ -120,6 +117,7 @@ func (s service) ComputeChecksums(force bool) error {
 		if err != nil {
 			return err
 		}
+		err = fob.Close()
 
 	}
 	return nil
@@ -157,7 +155,10 @@ func (s service) DetectMimetype(force bool) error {
 		if err != nil {
 			return err
 		}
-		fob.Close()
+		err = fob.Close()
+		if err != nil {
+			return err
+		}
 	}
 	return err
 }

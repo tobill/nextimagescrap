@@ -151,7 +151,7 @@ func reorganizeToFolder(sourcePath *string, destPath *string) {
 	}
 
 	organizeService := imports.NewOrganizeService(fs, s, dfs)
-	err = organizeService.OrganizeToFolder(true)
+	err = organizeService.OrganizeToFolder()
 	if err != nil {
 		log.Printf("Error reornanize: %v", err)
 		os.Exit(0)

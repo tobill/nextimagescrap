@@ -29,7 +29,7 @@ type Service interface {
 	DetectMimetype(force bool) error
 	ComputeChecksums(force bool) error
 	ExtractCreationDate(force bool) error
-	OrganizeToFolder(force bool) error
+	OrganizeToFolder() error
 }
 
 type SourceDbRepository interface {
@@ -215,20 +215,17 @@ func (s service) ExtractExifDataFromFile(media *SourceMedia) (time.Time, error) 
 	if err != nil {
 		return time.Time{}, err
 	}
-	tagName := "DateTime"
 	rootIfd := index.RootIfd
-	// We know the tag we want is on IFD0 (the first/root IFD).
-	results, err := rootIfd.FindTagWithName(tagName)
-	if err != nil {
-		return time.Time{}, err
+	entries := rootIfd.DumpTags()
+	createTime := time.Time{}
+	for j := range entries {
+		t := entries[j].TagName()
+		if t == "DateTimeOriginal" || t == "DateTime" {
+			v, _ := entries[j].Value()
+			createTime, err = time.Parse("2006:01:02 15:04:05", v.(string))
+		}
 	}
-	ite := results[0]
-	valueRaw, err := ite.Value()
-	if err != nil {
-		return time.Time{}, err
-	}
-	value, err := time.Parse("2006:01:02 15:04:05", valueRaw.(string))
-	return value, err
+	return createTime, err
 }
 
 func (s service) ExtractDateByFilename(media *SourceMedia) (time.Time, error) {
@@ -247,7 +244,7 @@ func (s service) ExtractDateByFilename(media *SourceMedia) (time.Time, error) {
 	return time.Time{}, err
 }
 
-func (s service) OrganizeToFolder(force bool) error {
+func (s service) OrganizeToFolder() error {
 	mtFilter := []string{"image/jpeg", "video/mp4", "image/png"}
 	mtExt := []string{"jpg", "mp4", "png"}
 	//mtFilter := []string{"video/mp4", "image/png"}

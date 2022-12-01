@@ -130,11 +130,12 @@ func (s *DbSourceStorage) GetFilesByMimetypeFilter(filter []string) ([]*imports.
 			for i := range filter {
 				if filter[i] == dbsm.Mimetype {
 					sm := &imports.SourceMedia{
-						Id:       dbsm.Id,
-						Key:      dbsm.Key,
-						Path:     dbsm.Path,
-						Mimetype: dbsm.Mimetype,
-						Checksum: dbsm.Checksum,
+						Id:           dbsm.Id,
+						Key:          dbsm.Key,
+						Path:         dbsm.Path,
+						Mimetype:     dbsm.Mimetype,
+						Checksum:     dbsm.Checksum,
+						CreationDate: dbsm.CreationDate,
 					}
 					me = append(me, sm)
 					break

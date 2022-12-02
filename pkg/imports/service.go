@@ -175,29 +175,27 @@ func (s service) ExtractCreationDate(force bool) error {
 			log.Printf("CreationDate alr3eday present %v %v", medialist[i].Path, medialist[i].CreationDate)
 			continue
 		}
-		dt, err := s.ExtractExifDataFromFile(medialist[i])
-		if err != nil {
-			dt, err = s.ExtractDateByFilename(medialist[i])
-		}
-		if err == nil {
-			medialist[i].CreationDate = dt
-			log.Printf("found CreationDate for %v %v", medialist[i].Path, medialist[i].CreationDate)
-			_, err = s.sdr.SaveMedia(medialist[i])
-			if err != nil {
-				return err
-			}
-		} else {
-			log.Printf("could not find CreationDate for %v", medialist[i].Path)
-		}
+		//dt, err := s.ExtractExifDataFromFile(medialist[i])
+		//if err != nil {
+		//	dt, err = s.ExtractDateByFilename(medialist[i])
+		//}
+		//if err == nil {
+		//	medialist[i].CreationDate = dt
+		//	log.Printf("found CreationDate for %v %v", medialist[i].Path, medialist[i].CreationDate)
+		//	_, err = s.sdr.SaveMedia(medialist[i])
+		//	if err != nil {
+		//		return err
+		//	}
+		//} else {
+		//	log.Printf("could not find CreationDate for %v", medialist[i].Path)
+		//}
 	}
 	return nil
 }
 
 func (s service) ExtractExifDataFromFile(media *SourceMedia) (time.Time, error) {
 	fob, err := os.Open(media.Path)
-	defer func(fob *os.File) {
-		err = fob.Close()
-	}(fob)
+	defer fob.Close()
 	if err != nil {
 		return time.Time{}, err
 	}

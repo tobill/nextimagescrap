@@ -37,8 +37,19 @@ type DestinationFileStorage struct {
 }
 
 func (d *DestinationFileStorage) getTargetPath(media *imports.SourceMedia) (string, error) {
-	datepath := filepath.Join(d.destinationPath, media.CreationDate.Format("2006"),
-		media.CreationDate.Format("01"))
+	var datepath string
+	var mtypep string
+	if media.Mimetype == "video/mp4" {
+		mtypep = "video"
+	} else {
+		mtypep = "images"
+	}
+	if media.CreationDate.Year() > 200 {
+		datepath = filepath.Join(d.destinationPath, mtypep, media.CreationDate.Format("2006"),
+			media.CreationDate.Format("01"))
+	} else {
+		datepath = "unknown"
+	}
 	if _, err := os.Stat(datepath); errors.Is(err, os.ErrNotExist) {
 		if err := os.MkdirAll(datepath, os.ModePerm); err != nil {
 			return "", err

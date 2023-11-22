@@ -88,7 +88,9 @@ func listAll(sourcePath *string) {
 		os.Exit(0)
 	}
 	for i := range me {
-		log.Printf("Entry: %d: %v", i, me[i])
+		if me[i].Id > 660 {
+			log.Printf("Entry: %d: %v", i, me[i])
+		}
 	}
 
 }

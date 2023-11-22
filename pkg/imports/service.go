@@ -164,31 +164,38 @@ func (s service) DetectMimetype(force bool) error {
 }
 
 func (s service) ExtractCreationDate(force bool) error {
-	mtFilter := []string{"image/jpeg", "video/mp4", "image/png"}
-	//mtFilter := []string{"video/mp4", "image/png"}
+	mtFilter := []string{"image/jpeg", "image/png"}
+	//mtFilter := []string{"video/mp4"}
 	medialist, err := s.sdr.GetFilesByMimetypeFilter(mtFilter)
 	if err != nil {
 		return err
 	}
 	for i := range medialist {
 		if medialist[i].CreationDate.Year() > 2000 && !force {
-			log.Printf("CreationDate alr3eday present %v %v", medialist[i].Path, medialist[i].CreationDate)
+			//if medialist[i].Id != 19192 { // --C:\Data\Bilder\samples
+			//log.Printf("CreationDate alr3eday present %v %v", medialist[i].Path, medialist[i].CreationDate)
 			continue
+
 		}
-		//dt, err := s.ExtractExifDataFromFile(medialist[i])
-		//if err != nil {
-		//	dt, err = s.ExtractDateByFilename(medialist[i])
-		//}
-		//if err == nil {
-		//	medialist[i].CreationDate = dt
-		//	log.Printf("found CreationDate for %v %v", medialist[i].Path, medialist[i].CreationDate)
-		//	_, err = s.sdr.SaveMedia(medialist[i])
-		//	if err != nil {
-		//		return err
-		//	}
-		//} else {
-		//	log.Printf("could not find CreationDate for %v", medialist[i].Path)
-		//}
+		log.Printf("search exif CreationDate for %v", medialist[i].Path)
+		var dt time.Time
+		if medialist[i].Mimetype != "video/mp4" {
+			dt, err = s.ExtractExifDataFromFile(medialist[i])
+		}
+		if err != nil || medialist[i].Mimetype == "video/mp4" {
+			log.Printf("%v", err)
+			dt, err = s.ExtractDateByFilename(medialist[i])
+		}
+		if err == nil {
+			medialist[i].CreationDate = dt
+			log.Printf("found CreationDate for %v", medialist[i])
+			_, err = s.sdr.SaveMedia(medialist[i])
+			if err != nil {
+				return err
+			}
+		} else {
+			log.Printf("could not find CreationDate for %v", medialist[i].Path)
+		}
 	}
 	return nil
 }
@@ -217,7 +224,9 @@ func (s service) ExtractExifDataFromFile(media *SourceMedia) (time.Time, error) 
 	entries := rootIfd.DumpTags()
 	createTime := time.Time{}
 	for j := range entries {
+
 		t := entries[j].TagName()
+		log.Printf(t)
 		if t == "DateTimeOriginal" || t == "DateTime" {
 			v, _ := entries[j].Value()
 			createTime, err = time.Parse("2006:01:02 15:04:05", v.(string))
